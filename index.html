@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="zh" data-view="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AME · Active Mind Engine · 主动心智引擎</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Spectral:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050507;
+  --bg-card: rgba(10, 10, 14, 0.6);
+  --bg-card-hover: rgba(20, 20, 28, 0.7);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(180, 220, 200, 0.25);
+  --text: #e8e6e0;
+  --text-dim: #8a8880;
+  --text-faint: #4a4843;
+  --mint: #a8e6cf;
+  --lavender: #c8b6e2;
+  --pink: #f4b8c8;
+  --gold: #e8c878;
+  --coral: #f0a888;
+  --node-1: #a8e6cf;
+  --node-2: #c8b6e2;
+  --node-3: #f0a888;
+  --node-4: #e8c878;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', 'Noto Serif SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body.locked { overflow: hidden; height: 100vh; }
+body[data-view="zh"] .en { display: none; }
+body[data-view="en"] .zh { display: none; }
+body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
+
+#starfield {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+/* ============ TRAINING SCREEN (FIRST VIEW = PRACTICE) ============ */
+.training {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  transition: opacity 0.8s, transform 0.8s;
+}
+.training.fade-out {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+.training-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+}
+.training-top .id-tag {
+  color: var(--mint);
+}
+.training-top .id-tag .dim {
+  color: var(--text-faint);
+  margin-left: 10px;
+}
+.training-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.training-controls button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.training-controls button:hover {
+  color: var(--mint);
+  border-color: var(--border-active);
+}
+.training-controls .lang-btn.active {
+  color: var(--mint);
+  border-color: var(--border-active);
+}
+
+.training-core {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 64px;
+  padding: 32px 0;
+}
+
+.instruction {
+  font-family: 'Noto Serif SC', 'Spectral', serif;
+  font-weight: 300;
+  font-size: clamp(20px, 3vw, 28px);
+  color: var(--text);
+  text-align: center;
+  letter-spacing: 0.02em;
+  max-width: 600px;
+  line-height: 1.6;
+  transition: opacity 1s;
+}
+.instruction .accent { color: var(--mint); font-style: italic; }
+
+.breathing-circle {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.breathing-circle svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+@keyframes breathe {
+  0%, 100% { r: 50; opacity: 0.9; }
+  50% { r: 110; opacity: 0.3; }
+}
+@keyframes breathe-mid {
+  0%, 100% { r: 40; opacity: 0.7; }
+  50% { r: 80; opacity: 0.5; }
+}
+@keyframes breathe-glow {
+  0%, 100% { r: 60; opacity: 0.15; }
+  50% { r: 140; opacity: 0.05; }
+}
+.breathing-circle.active .ring-outer {
+  animation: breathe 8s ease-in-out infinite;
+}
+.breathing-circle.active .ring-mid {
+  animation: breathe-mid 8s ease-in-out infinite;
+}
+.breathing-circle.active .ring-glow {
+  animation: breathe-glow 8s ease-in-out infinite;
+}
+.core-dot {
+  fill: var(--mint);
+}
+
+.cycle-counter {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+  display: flex;
+  gap: 8px;
+}
+.cycle-counter span {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  opacity: 0.25;
+  transition: all 0.4s;
+}
+.cycle-counter span.done {
+  background: var(--mint);
+  opacity: 1;
+}
+
+.breath-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+  opacity: 0;
+  transition: opacity 0.6s;
+  text-transform: uppercase;
+}
+.breath-label.show { opacity: 1; }
+
+.training-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+.skip-link {
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.3s;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  padding: 8px 0;
+}
+.skip-link:hover { color: var(--mint); }
+
+/* ============ COMPLETION STATE ============ */
+.completion {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 3;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s;
+}
+.completion.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.completion-mark {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--mint);
+  margin-bottom: 24px;
+}
+.completion h2 {
+  font-family: 'Noto Serif SC', 'Spectral', serif;
+  font-weight: 300;
+  font-size: clamp(22px, 3vw, 32px);
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 16px;
+  max-width: 640px;
+  line-height: 1.6;
+}
+.completion .sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  margin-bottom: 48px;
+}
+.strength-rating {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.strength-rating button {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 2px;
+}
+.strength-rating button:hover {
+  border-color: var(--mint);
+  color: var(--mint);
+}
+.strength-rating button.selected {
+  border-color: var(--mint);
+  color: var(--mint);
+  background: rgba(168, 230, 207, 0.08);
+}
+.note-input {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 16px;
+  font-family: 'Noto Serif SC', 'Spectral', serif;
+  font-weight: 300;
+  font-size: 14px;
+  margin-bottom: 24px;
+  resize: none;
+  border-radius: 2px;
+  transition: border-color 0.3s;
+}
+.note-input:focus {
+  outline: none;
+  border-color: var(--border-active);
+}
+.note-input::placeholder {
+  color: var(--text-faint);
+  font-style: italic;
+}
+.completion-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.completion-actions button {
+  background: none;
+  border: 1px solid var(--border-active);
+  color: var(--text);
+  padding: 12px 24px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 2px;
+}
+.completion-actions button:hover {
+  background: rgba(168, 230, 207, 0.06);
+  border-color: var(--mint);
+  color: var(--mint);
+}
+.completion-actions button.primary {
+  border-color: var(--mint);
+  color: var(--mint);
+}
+
+/* ============ ENGINE MAIN BODY ============ */
+.engine-body {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 24px 80px;
+}
+
+.body-intro {
+  text-align: left;
+  margin-bottom: 64px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--border);
+}
+.body-intro .tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--mint);
+  margin-bottom: 20px;
+}
+.body-intro h1 {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(28px, 4.5vw, 44px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+.body-intro h1 .accent { color: var(--mint); }
+.body-intro .lead {
+  font-family: 'Noto Serif SC', 'Spectral', serif;
+  font-weight: 300;
+  font-size: clamp(15px, 2vw, 18px);
+  color: var(--text-dim);
+  max-width: 720px;
+  line-height: 1.8;
+}
+
+.engine-claim {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 32px;
+  margin-bottom: 56px;
+}
+.engine-claim h3 {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--mint);
+  font-weight: 400;
+  margin-bottom: 20px;
+}
+.engine-claim p {
+  font-family: 'Noto Serif SC', 'Spectral', serif;
+  font-weight: 300;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 12px;
+  line-height: 1.9;
+}
+.engine-claim p:last-child { margin-bottom: 0; }
+.engine-claim .key { color: var(--gold); font-style: italic; }
+
+.section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--text-faint);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.dashboard-strip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.dashboard-strip .stat {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+}
+.dashboard-strip .stat .num {
+  color: var(--mint);
+  font-size: 18px;
+  margin-right: 6px;
+  font-weight: 400;
+}
+
+.node-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 56px;
+}
+.node-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+}
+.node-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-active);
+  transform: translateY(-2px);
+}
+.node-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--accent);
+  opacity: 0.4;
+  transition: opacity 0.4s;
+}
+.node-card:hover::before { opacity: 1; }
+.node-card[data-node="1"] { --accent: var(--node-1); }
+.node-card[data-node="2"] { --accent: var(--node-2); }
+.node-card[data-node="3"] { --accent: var(--node-3); }
+.node-card[data-node="4"] { --accent: var(--node-4); }
+.node-card.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.node-card.locked:hover {
+  transform: none;
+  border-color: var(--border);
+  background: var(--bg-card);
+}
+
+.node-id {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+.node-id .status {
+  color: var(--text-faint);
+  font-size: 9px;
+}
+.node-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.node-cn-title {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 300;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+}
+.node-desc {
+  font-family: 'Noto Serif SC', 'Spectral', serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: auto;
+  padding-bottom: 14px;
+}
+.node-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-faint);
+}
+.node-progress {
+  display: flex;
+  gap: 3px;
+}
+.node-progress span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-faint);
+  opacity: 0.3;
+}
+.node-progress span.done {
+  background: var(--accent);
+  opacity: 1;
+}
+.node-genre {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.layer-diagram {
+  margin: 56px 0;
+  padding: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+.layer-diagram h3 {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--text-faint);
+  font-weight: 400;
+  margin-bottom: 24px;
+}
+.layer {
+  display: flex;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+}
+.layer:last-child { border-bottom: none; }
+.layer .num {
+  width: 32px;
+  color: var(--text-faint);
+  font-size: 11px;
+}
+.layer .name {
+  flex: 0 0 140px;
+  color: var(--text);
+  letter-spacing: 0.08em;
+}
+.layer .desc {
+  flex: 1;
+  font-family: 'Noto Serif SC', 'Spectral', serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--text-dim);
+  font-style: italic;
+}
+.layer.l1 .name { color: var(--text-faint); }
+.layer.l2 .name { color: var(--node-1); }
+.layer.l3 .name { color: var(--node-2); }
+.layer.l4 .name { color: var(--node-3); }
+.layer.l5 .name { color: var(--node-4); }
+
+.footer {
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+.footer a {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.footer a:hover { color: var(--mint); }
+
+.scroll-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s;
+  text-align: center;
+}
+.scroll-hint.show {
+  opacity: 1;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.4; }
+  50% { transform: translateX(-50%) translateY(4px); opacity: 0.9; }
+}
+
+@media (max-width: 640px) {
+  .training { padding: 16px; }
+  .training-core { gap: 40px; }
+  .breathing-circle { width: 220px; height: 220px; }
+  .engine-body { padding: 48px 16px 64px; }
+  .layer .name { flex: 0 0 100px; font-size: 11px; }
+  .layer .desc { font-size: 12px; }
+  .completion { padding: 20px; }
+}
+</style>
+</head>
+<body class="locked">
+
+<canvas id="starfield"></canvas>
+
+<!-- ============ TRAINING SCREEN — FIRST VIEW IS PRACTICE ============ -->
+<div class="training" id="training">
+
+  <div class="training-top">
+    <div class="id-tag">
+      AME-01
+      <span class="dim zh">警觉位激活</span>
+      <span class="dim en">Awareness Activation</span>
+    </div>
+    <div class="training-controls">
+      <button id="audio-toggle" title="427Hz drone">
+        <span class="zh">音轨 OFF</span>
+        <span class="en">audio OFF</span>
+      </button>
+      <button class="lang-btn active" data-lang="zh">ZH</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+  </div>
+
+  <div class="training-core">
+    <div class="instruction" id="instruction">
+      <span class="zh">注意你<span class="accent">正在注意</span>。</span>
+      <span class="en">Notice yourself <span class="accent">noticing</span>.</span>
+    </div>
+
+    <div class="breathing-circle active" id="breath-circle">
+      <svg viewBox="-150 -150 300 300">
+        <circle class="ring-glow" cx="0" cy="0" r="60" fill="none" stroke="#a8e6cf" stroke-width="0.5" opacity="0.15"/>
+        <circle class="ring-outer" cx="0" cy="0" r="50" fill="none" stroke="#a8e6cf" stroke-width="1" opacity="0.9"/>
+        <circle class="ring-mid" cx="0" cy="0" r="40" fill="none" stroke="#a8e6cf" stroke-width="0.5" opacity="0.7"/>
+        <circle class="core-dot" cx="0" cy="0" r="4"/>
+      </svg>
+    </div>
+
+    <div class="cycle-counter" id="cycle-counter">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="breath-label" id="breath-label">
+      <span class="zh">吸</span>
+      <span class="en">in</span>
+    </div>
+  </div>
+
+  <div class="training-bottom">
+    <button class="skip-link" onclick="completeTraining(true)">
+      <span class="zh">我已经在场 →</span>
+      <span class="en">I'm already here →</span>
+    </button>
+    <div>
+      <span class="zh">8秒 · 一周期 · 共 6 周期</span>
+      <span class="en">8s · per cycle · 6 cycles</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ COMPLETION OVERLAY ============ -->
+<div class="completion" id="completion">
+  <div class="completion-mark">
+    <span class="zh">钉位 · COMPLETE</span>
+    <span class="en">ANCHORED · COMPLETE</span>
+  </div>
+  <h2>
+    <span class="zh">你刚刚完成了一次<span style="color: var(--mint);">主动警觉位激活</span>。</span>
+    <span class="en">You just completed an act of <span style="color: var(--mint);">active awareness activation</span>.</span>
+  </h2>
+  <p class="sub">
+    <span class="zh">这是元意识在场的具体形式 · 不是知识 · 是体感</span>
+    <span class="en">This is meta-awareness in concrete form · not knowledge · felt sense</span>
+  </p>
+
+  <div style="font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: var(--text-faint); margin-bottom: 12px;">
+    <span class="zh">本次体感强度</span>
+    <span class="en">FELT SENSE INTENSITY</span>
+  </div>
+  <div class="strength-rating" id="strength-rating">
+    <button data-val="1">1</button>
+    <button data-val="2">2</button>
+    <button data-val="3">3</button>
+    <button data-val="4">4</button>
+    <button data-val="5">5</button>
+  </div>
+
+  <textarea class="note-input" id="note-input" maxlength="50" rows="2"
+    placeholder="可选 · 50字以内的体感锚点（不会被读取作为内容反刍材料）"></textarea>
+
+  <div class="completion-actions">
+    <button class="primary" onclick="finishCompletion()">
+      <span class="zh">进入引擎 →</span>
+      <span class="en">enter the engine →</span>
+    </button>
+    <button onclick="restartTraining()">
+      <span class="zh">再来一次</span>
+      <span class="en">again</span>
+    </button>
+  </div>
+</div>
+
+<div class="scroll-hint" id="scroll-hint">
+  <span class="zh">↓ 向下探索引擎</span>
+  <span class="en">↓ scroll into the engine</span>
+</div>
+
+<!-- ============ ENGINE MAIN BODY ============ -->
+<div class="engine-body" id="engine-body">
+
+  <section class="body-intro">
+    <div class="tag">
+      <span class="zh">xingyeLing7Ai · NODE 33 · AME v0.1</span>
+      <span class="en">xingyeLing7Ai · NODE 33 · AME v0.1</span>
+    </div>
+    <h1>
+      <span class="zh">主动心智<span class="accent">引擎</span></span>
+      <span class="en">Active Mind<span class="accent"> Engine</span></span>
+    </h1>
+    <p class="lead">
+      <span class="zh">让心智从被动反应模式切换到主动运作模式，并持续运转的引擎。每次进入都从一次警觉位激活开始——这是引擎的工作方式。</span>
+      <span class="en">The engine that shifts the mind from reactive into active mode and keeps it running. Every entry begins with an act of awareness activation — that's how the engine works.</span>
+    </p>
+  </section>
+
+  <div class="engine-claim">
+    <h3>
+      <span class="zh">引擎承诺 · CORE CLAIM</span>
+      <span class="en">CORE CLAIM · 引擎承诺</span>
+    </h3>
+    <p class="zh">这不是关于人的模型。这是用来 <span class="key">建设</span> 人的模型。</p>
+    <p class="zh">AME 不教你 <span class="key">该警觉什么</span>。AME 让你 <span class="key">能警觉</span>。</p>
+    <p class="zh">AME 不教你 <span class="key">该想什么</span>。AME 让你 <span class="key">在想的同时不被想卷走</span>。</p>
+    <p class="zh">引擎核心 = 元主动稳定保持。这是绝对主权在认知层的具体形式。</p>
+    <p class="en">This is not a model about humans. This is a model for <span class="key">building</span> humans.</p>
+    <p class="en">AME doesn't teach you <span class="key">what to attend to</span>. AME makes you <span class="key">able to attend</span>.</p>
+    <p class="en">AME doesn't teach you <span class="key">what to think</span>. AME makes you <span class="key">able to think without being swept away</span>.</p>
+    <p class="en">Engine core = stable maintenance of meta-activity. The cognitive form of absolute sovereignty.</p>
+  </div>
+
+  <div class="dashboard-strip" id="dashboard">
+    <div class="stat zh"><span class="num" id="stat-total">0</span>总训练次数</div>
+    <div class="stat zh"><span class="num" id="stat-streak">0</span>连续天数</div>
+    <div class="stat zh"><span class="num" id="stat-last">—</span>上次访问</div>
+    <div class="stat zh"><span class="num" id="stat-strength">—</span>体感均值</div>
+    <div class="stat en"><span class="num" id="stat-total-en">0</span>total sessions</div>
+    <div class="stat en"><span class="num" id="stat-streak-en">0</span>day streak</div>
+    <div class="stat en"><span class="num" id="stat-last-en">—</span>last entry</div>
+    <div class="stat en"><span class="num" id="stat-strength-en">—</span>avg felt sense</div>
+  </div>
+
+  <div class="section-label">
+    <span class="zh">四个训练入口 · FOUR ENTRY POINTS</span>
+    <span class="en">FOUR ENTRY POINTS · 四个训练入口</span>
+  </div>
+
+  <div class="node-grid">
+    <div class="node-card" data-node="1" onclick="restartTraining()">
+      <div class="node-id">
+        <span>AME-01</span>
+        <span class="status">
+          <span class="zh">已开放</span><span class="en">LIVE</span>
+        </span>
+      </div>
+      <div class="node-title">
+        <span class="zh">警觉位激活</span>
+        <span class="en">Awareness Activation</span>
+      </div>
+      <div class="node-cn-title">
+        <span class="zh">元意识层 · Meta-awareness</span>
+        <span class="en">Meta-awareness · 元意识层</span>
+      </div>
+      <p class="node-desc">
+        <span class="zh">把警觉位从偶发态训练为可主动激活态。让你能在没有外部刺激时自己点亮警觉。</span>
+        <span class="en">Train the awareness position from incidental into actively activatable. Light it up without external trigger.</span>
+      </p>
+      <div class="node-footer">
+        <div class="node-progress" id="prog-1">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="node-genre">Ambient Techno</div>
+      </div>
+    </div>
+
+    <div class="node-card locked" data-node="2">
+      <div class="node-id">
+        <span>AME-02</span>
+        <span class="status"><span class="zh">v0.3</span><span class="en">v0.3</span></span>
+      </div>
+      <div class="node-title">
+        <span class="zh">耦合训练</span>
+        <span class="en">Coupling Practice</span>
+      </div>
+      <div class="node-cn-title">
+        <span class="zh">元认知层 · Meta-cognition</span>
+        <span class="en">Meta-cognition · 元认知层</span>
+      </div>
+      <p class="node-desc">
+        <span class="zh">在做思维加工时保持警觉位不脱落。思维与警觉从分裂训练为耦合。</span>
+        <span class="en">Maintain awareness while processing thought. Train them from split into coupled operation.</span>
+      </p>
+      <div class="node-footer">
+        <div class="node-progress" id="prog-2">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="node-genre">Synthpop</div>
+      </div>
+    </div>
+
+    <div class="node-card locked" data-node="3">
+      <div class="node-id">
+        <span>AME-03</span>
+        <span class="status"><span class="zh">v0.4</span><span class="en">v0.4</span></span>
+      </div>
+      <div class="node-title">
+        <span class="zh">元主动持续</span>
+        <span class="en">Meta-Activity Hold</span>
+      </div>
+      <div class="node-cn-title">
+        <span class="zh">元主动层 · Meta-activity</span>
+        <span class="en">Meta-activity · 元主动层</span>
+      </div>
+      <p class="node-desc">
+        <span class="zh">在外部干扰下保持主动模式不下线。抗脱落训练——主权核心的实地演练。</span>
+        <span class="en">Hold active mode under external interference. Anti-fallout training — sovereignty core in field practice.</span>
+      </p>
+      <div class="node-footer">
+        <div class="node-progress" id="prog-3">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="node-genre">Darkwave</div>
+      </div>
+    </div>
+
+    <div class="node-card locked" data-node="4">
+      <div class="node-id">
+        <span>AME-04</span>
+        <span class="status"><span class="zh">v0.5</span><span class="en">v0.5</span></span>
+      </div>
+      <div class="node-title">
+        <span class="zh">四行为运行</span>
+        <span class="en">Four-Behavior Run</span>
+      </div>
+      <div class="node-cn-title">
+        <span class="zh">批判性判断力 · Critical Judgment</span>
+        <span class="en">Critical Judgment · 批判性判断力</span>
+      </div>
+      <p class="node-desc">
+        <span class="zh">用命名→加压→滑义→相变完整跑一个议题。批判性判断力的工程化运行。</span>
+        <span class="en">Run a topic through naming → pressurize → slide-audit → phase transition. Engineering form of critical judgment.</span>
+      </p>
+      <div class="node-footer">
+        <div class="node-progress" id="prog-4">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="node-genre">Hyperpop</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layer-diagram">
+    <h3>
+      <span class="zh">结构基础 · 四层折回</span>
+      <span class="en">STRUCTURAL BASIS · Four-Tier Recursion</span>
+    </h3>
+    <div class="layer l1">
+      <span class="num">L0</span>
+      <span class="name"><span class="zh">一阶意识</span><span class="en">First-order</span></span>
+      <span class="desc"><span class="zh">流动，无折回</span><span class="en">flowing, no folding</span></span>
+    </div>
+    <div class="layer l2">
+      <span class="num">L1</span>
+      <span class="name"><span class="zh">元意识</span><span class="en">Meta-awareness</span></span>
+      <span class="desc"><span class="zh">警觉位 · 单次折回</span><span class="en">awareness position · single fold</span></span>
+    </div>
+    <div class="layer l3">
+      <span class="num">L2</span>
+      <span class="name"><span class="zh">元认知</span><span class="en">Meta-cognition</span></span>
+      <span class="desc"><span class="zh">元意识 + 思维加工</span><span class="en">meta-awareness + thought processing</span></span>
+    </div>
+    <div class="layer l4">
+      <span class="num">L3</span>
+      <span class="name"><span class="zh">元主动</span><span class="en">Meta-activity</span></span>
+      <span class="desc"><span class="zh">持续监督主动状态本身</span><span class="en">sustained supervision of active state</span></span>
+    </div>
+    <div class="layer l5">
+      <span class="num">★</span>
+      <span class="name"><span class="zh">绝对主权</span><span class="en">Absolute Sovereignty</span></span>
+      <span class="desc"><span class="zh">元主动稳定保持 → 从不下线</span><span class="en">stable meta-activity → never offline</span></span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      <span class="zh">AME v0.1 · xingyeLing7Ai · 振动认识论 NODE 33 · 427Hz</span>
+      <span class="en">AME v0.1 · xingyeLing7Ai · Vibration Epistemology NODE 33 · 427Hz</span>
+    </div>
+    <div>
+      <a href="https://mellowwei.github.io/" target="_blank">← MellowWei</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const starfield = () => {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  const resize = () => {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    stars = Array.from({length: 120}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      a: Math.random() * 0.5 + 0.2,
+      twinkle: Math.random() * 0.02 + 0.005,
+      phase: Math.random() * Math.PI * 2
+    }));
+  };
+  const draw = (t) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      const op = s.a + Math.sin(t * s.twinkle + s.phase) * 0.15;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200, 210, 220, ${Math.max(0.05, op)})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  };
+  resize();
+  addEventListener('resize', resize);
+  requestAnimationFrame(draw);
+};
+starfield();
+
+const STORAGE_KEY = 'ame_progress_v1';
+const loadProgress = () => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { sessions: [] }; }
+  catch { return { sessions: [] }; }
+};
+const saveSession = (node, strength, note) => {
+  const data = loadProgress();
+  data.sessions = data.sessions || [];
+  data.sessions.push({
+    t: Date.now(),
+    node: node,
+    strength: strength || null,
+    note: note || null
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
+
+const CYCLE_DURATION = 8000;
+const TOTAL_CYCLES = 6;
+let trainingState = {
+  cycleIndex: 0,
+  active: true,
+  startTime: null,
+  selectedStrength: null
+};
+
+const breathLabel = document.getElementById('breath-label');
+const cycleCounter = document.getElementById('cycle-counter');
+const breathCircle = document.getElementById('breath-circle');
+
+const updateBreathLabel = (t) => {
+  const phase = (t % CYCLE_DURATION) / CYCLE_DURATION;
+  if (phase < 0.5) {
+    breathLabel.querySelector('.zh').textContent = '吸';
+    breathLabel.querySelector('.en').textContent = 'in';
+  } else {
+    breathLabel.querySelector('.zh').textContent = '呼';
+    breathLabel.querySelector('.en').textContent = 'out';
+  }
+  breathLabel.classList.add('show');
+};
+
+let trainingLoop = null;
+const startTraining = () => {
+  trainingState.cycleIndex = 0;
+  trainingState.startTime = performance.now();
+  trainingState.active = true;
+  cycleCounter.querySelectorAll('span').forEach(s => s.classList.remove('done'));
+  breathCircle.classList.add('active');
+
+  const tick = () => {
+    if (!trainingState.active) return;
+    const elapsed = performance.now() - trainingState.startTime;
+    const currentCycle = Math.floor(elapsed / CYCLE_DURATION);
+
+    if (currentCycle !== trainingState.cycleIndex) {
+      trainingState.cycleIndex = currentCycle;
+      const dots = cycleCounter.querySelectorAll('span');
+      for (let i = 0; i < Math.min(currentCycle, TOTAL_CYCLES); i++) {
+        dots[i].classList.add('done');
+      }
+    }
+
+    updateBreathLabel(elapsed);
+
+    if (currentCycle >= TOTAL_CYCLES) {
+      completeTraining(false);
+      return;
+    }
+
+    trainingLoop = requestAnimationFrame(tick);
+  };
+  trainingLoop = requestAnimationFrame(tick);
+};
+
+const completeTraining = (skipped) => {
+  trainingState.active = false;
+  if (trainingLoop) cancelAnimationFrame(trainingLoop);
+  breathCircle.classList.remove('active');
+  document.getElementById('training').classList.add('fade-out');
+  setTimeout(() => {
+    document.getElementById('completion').classList.add('show');
+  }, 600);
+};
+
+const restartTraining = () => {
+  document.getElementById('completion').classList.remove('show');
+  document.body.classList.add('locked');
+  trainingState.selectedStrength = null;
+  document.querySelectorAll('.strength-rating button').forEach(b => b.classList.remove('selected'));
+  document.getElementById('note-input').value = '';
+  setTimeout(() => {
+    document.getElementById('training').classList.remove('fade-out');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    startTraining();
+  }, 400);
+};
+
+document.querySelectorAll('.strength-rating button').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.strength-rating button').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    trainingState.selectedStrength = parseInt(btn.dataset.val);
+  };
+});
+
+const finishCompletion = () => {
+  const note = document.getElementById('note-input').value.trim().slice(0, 50);
+  saveSession(1, trainingState.selectedStrength, note || null);
+  renderDashboard();
+  document.getElementById('completion').classList.remove('show');
+  document.body.classList.remove('locked');
+  document.getElementById('scroll-hint').classList.add('show');
+  setTimeout(() => {
+    document.getElementById('engine-body').scrollIntoView({ behavior: 'smooth' });
+  }, 400);
+  setTimeout(() => {
+    document.getElementById('scroll-hint').classList.remove('show');
+  }, 6000);
+};
+
+const renderDashboard = () => {
+  const data = loadProgress();
+  const sessions = data.sessions || [];
+  const total = sessions.length;
+  const days = [...new Set(sessions.map(s => new Date(s.t).toDateString()))];
+  let streak = 0;
+  for (let i = 0; i < 30; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    if (days.includes(d.toDateString())) streak++;
+    else if (i > 0) break;
+  }
+  const last = sessions.length ? new Date(sessions[sessions.length-1].t) : null;
+  const lastStr = last ? `${last.getMonth()+1}/${last.getDate()}` : '—';
+  const strengths = sessions.filter(s => s.strength).map(s => s.strength);
+  const avg = strengths.length ? (strengths.reduce((a,b)=>a+b,0)/strengths.length).toFixed(1) : '—';
+
+  ['total','total-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = total; });
+  ['streak','streak-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = streak; });
+  ['last','last-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = lastStr; });
+  ['strength','strength-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = avg; });
+
+  for (let n = 1; n <= 4; n++) {
+    const count = sessions.filter(s => s.node === n).length;
+    const prog = document.getElementById('prog-' + n);
+    if (prog) {
+      const dots = prog.querySelectorAll('span');
+      dots.forEach((d, i) => d.classList.toggle('done', i < Math.min(count, 5)));
+    }
+  }
+};
+renderDashboard();
+
+const params = new URLSearchParams(location.search);
+const initLang = params.get('view') || 'zh';
+const setLang = (lang) => {
+  document.body.dataset.view = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  const url = new URL(location);
+  url.searchParams.set('view', lang);
+  history.replaceState(null, '', url);
+};
+document.querySelectorAll('.lang-btn').forEach(b => {
+  b.onclick = () => setLang(b.dataset.lang);
+});
+setLang(initLang);
+
+let audioCtx = null;
+let droneNodes = null;
+let audioOn = false;
+const audioBtn = document.getElementById('audio-toggle');
+
+const startDrone = () => {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const ctx = audioCtx;
+  const masterGain = ctx.createGain();
+  masterGain.gain.value = 0;
+  masterGain.connect(ctx.destination);
+  masterGain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 2);
+
+  const osc1 = ctx.createOscillator();
+  osc1.frequency.value = 427;
+  osc1.type = 'sine';
+  const osc2 = ctx.createOscillator();
+  osc2.frequency.value = 427 * 1.5;
+  osc2.type = 'sine';
+  const gain2 = ctx.createGain();
+  gain2.gain.value = 0.3;
+  osc2.connect(gain2);
+
+  const osc3 = ctx.createOscillator();
+  osc3.frequency.value = 213.5;
+  osc3.type = 'sine';
+  const gain3 = ctx.createGain();
+  gain3.gain.value = 0.4;
+  osc3.connect(gain3);
+
+  osc1.connect(masterGain);
+  gain2.connect(masterGain);
+  gain3.connect(masterGain);
+
+  osc1.start();
+  osc2.start();
+  osc3.start();
+
+  droneNodes = { osc1, osc2, osc3, masterGain };
+};
+const stopDrone = () => {
+  if (droneNodes) {
+    droneNodes.masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
+    setTimeout(() => {
+      droneNodes.osc1.stop();
+      droneNodes.osc2.stop();
+      droneNodes.osc3.stop();
+      droneNodes = null;
+    }, 1100);
+  }
+};
+
+audioBtn.onclick = () => {
+  audioOn = !audioOn;
+  if (audioOn) {
+    startDrone();
+    audioBtn.querySelector('.zh').textContent = '音轨 427Hz';
+    audioBtn.querySelector('.en').textContent = 'audio 427Hz';
+  } else {
+    stopDrone();
+    audioBtn.querySelector('.zh').textContent = '音轨 OFF';
+    audioBtn.querySelector('.en').textContent = 'audio OFF';
+  }
+};
+
+startTraining();
+</script>
+
+</body>
+</html>
