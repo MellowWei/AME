@@ -4,6 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AME · Active Mind Engine · 主动心智引擎</title>
+
+<!-- SEO -->
+<meta name="description" content="主动心智引擎 · 进入即训练。注意你正在干什么。警觉是可建设的。主权从这里开始。 / Active Mind Engine · Enter to train. Notice what you're doing. Awareness can be built. Sovereignty begins here.">
+<meta name="keywords" content="meta-awareness, meta-cognition, meta-activity, sovereignty, xingyeLing7Ai, 元意识, 元认知, 元主动, 主权, 振动认识论, Vibration Epistemology">
+<meta name="author" content="xingyeLing7Ai · Wei Jueran · Mellow">
+
+<!-- Open Graph (微信/Facebook/LinkedIn link preview) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="AME · 主动心智引擎 · 进入即训练">
+<meta property="og:description" content="注意你正在干什么。警觉是可建设的。主权从这里开始。 / Notice what you're doing. Awareness can be built. Sovereignty begins here.">
+<meta property="og:url" content="https://mellowwei.github.io/AME/">
+<meta property="og:site_name" content="xingyeLing7Ai · NODE 33">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AME · Active Mind Engine · 主动心智引擎">
+<meta name="twitter:description" content="进入即训练。注意你正在干什么。警觉是可建设的。主权从这里开始。 / Enter to train. Notice what you're doing. Awareness can be built. Sovereignty begins here.">
+
+<!-- Theme color for mobile browsers -->
+<meta name="theme-color" content="#050507">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Spectral:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
@@ -194,29 +218,30 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   opacity: 1;
 }
 
-/* v0.1.2 — Hidden-in-plain-sight breath label with breathing opacity */
+/* v0.1.3 — Hidden-in-plain-sight breath label, visibility tuned */
 .breath-label {
   font-family: 'Space Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.3em;
-  color: var(--text-dim);
+  color: var(--mint);
   opacity: 0;
   text-transform: uppercase;
   position: absolute;
-  bottom: -8px;
+  bottom: -12px;
   pointer-events: none;
   user-select: none;
-  font-weight: 300;
+  font-weight: 400;
+  text-shadow: 0 0 8px rgba(168, 230, 207, 0.2);
 }
 @keyframes label-breathe-in {
-  0% { opacity: 0; transform: translateY(2px); }
-  30% { opacity: 0.32; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-2px); }
+  0% { opacity: 0; transform: translateY(3px); }
+  40% { opacity: 0.62; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-3px); }
 }
 @keyframes label-breathe-out {
-  0% { opacity: 0; transform: translateY(-2px); }
-  30% { opacity: 0.32; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(2px); }
+  0% { opacity: 0; transform: translateY(-3px); }
+  40% { opacity: 0.62; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(3px); }
 }
 .breath-label.cycle-in {
   animation: label-breathe-in 4s ease-in-out;
