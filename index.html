@@ -47,7 +47,6 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   z-index: 0; pointer-events: none;
 }
 
-/* ============ TRAINING SCREEN (FIRST VIEW = PRACTICE) ============ */
 .training {
   position: relative;
   z-index: 2;
@@ -110,8 +109,9 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 64px;
+  gap: 56px;
   padding: 32px 0;
+  position: relative;
 }
 
 .instruction {
@@ -153,6 +153,11 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   0%, 100% { r: 60; opacity: 0.15; }
   50% { r: 140; opacity: 0.05; }
 }
+@keyframes core-flash {
+  0% { r: 4; fill-opacity: 1; }
+  30% { r: 14; fill-opacity: 1; }
+  100% { r: 4; fill-opacity: 1; }
+}
 .breathing-circle.active .ring-outer {
   animation: breathe 8s ease-in-out infinite;
 }
@@ -164,6 +169,9 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
 }
 .core-dot {
   fill: var(--mint);
+}
+.core-dot.flash {
+  animation: core-flash 1.2s ease-out;
 }
 
 .cycle-counter {
@@ -186,16 +194,81 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   opacity: 1;
 }
 
+/* v0.1.2 — Hidden-in-plain-sight breath label with breathing opacity */
 .breath-label {
   font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.25em;
+  font-size: 12px;
+  letter-spacing: 0.3em;
   color: var(--text-dim);
   opacity: 0;
-  transition: opacity 0.6s;
+  text-transform: uppercase;
+  position: absolute;
+  bottom: -8px;
+  pointer-events: none;
+  user-select: none;
+  font-weight: 300;
+}
+@keyframes label-breathe-in {
+  0% { opacity: 0; transform: translateY(2px); }
+  30% { opacity: 0.32; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-2px); }
+}
+@keyframes label-breathe-out {
+  0% { opacity: 0; transform: translateY(-2px); }
+  30% { opacity: 0.32; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(2px); }
+}
+.breath-label.cycle-in {
+  animation: label-breathe-in 4s ease-in-out;
+}
+.breath-label.cycle-out {
+  animation: label-breathe-out 4s ease-in-out;
+}
+
+/* v0.1.2 — Field evidence flash messages */
+.field-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  border: 1px solid var(--mint);
+  padding: 20px 28px;
+  border-radius: 2px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--mint);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+  z-index: 5;
+  max-width: 400px;
+  line-height: 1.7;
+}
+.field-flash.show {
+  opacity: 1;
+}
+.field-flash .label {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 8px;
   text-transform: uppercase;
 }
-.breath-label.show { opacity: 1; }
+.field-flash .main {
+  font-family: 'Noto Serif SC', 'Spectral', serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.field-flash .main em {
+  color: var(--mint);
+  font-style: italic;
+}
 
 .training-bottom {
   display: flex;
@@ -205,21 +278,43 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   font-size: 10px;
   letter-spacing: 0.18em;
   color: var(--text-faint);
+  gap: 16px;
+  flex-wrap: wrap;
 }
-.skip-link {
+.skip-link, .notice-btn {
   color: var(--text-dim);
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.3s;
   background: none;
-  border: none;
-  font-family: inherit;
-  font-size: inherit;
-  letter-spacing: inherit;
-  padding: 8px 0;
+  border: 1px solid transparent;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  padding: 8px 12px;
 }
 .skip-link:hover { color: var(--mint); }
+.notice-btn {
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+.notice-btn:hover {
+  border-color: var(--border-active);
+  color: var(--mint);
+}
+.notice-btn.captured {
+  color: var(--mint);
+  border-color: var(--border-active);
+}
+.notice-btn.completed {
+  color: var(--text-faint);
+  border-color: var(--border);
+  cursor: default;
+}
+.notice-btn.completed:hover {
+  color: var(--text-faint);
+  border-color: var(--border);
+}
 
-/* ============ COMPLETION STATE ============ */
 .completion {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -233,6 +328,7 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   opacity: 0;
   pointer-events: none;
   transition: opacity 1.2s;
+  overflow-y: auto;
 }
 .completion.show {
   opacity: 1;
@@ -245,36 +341,58 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   color: var(--mint);
   margin-bottom: 24px;
 }
+.completion-mark.partial {
+  color: var(--gold);
+}
+.completion-mark.honest {
+  color: var(--lavender);
+}
 .completion h2 {
   font-family: 'Noto Serif SC', 'Spectral', serif;
   font-weight: 300;
-  font-size: clamp(22px, 3vw, 32px);
+  font-size: clamp(20px, 2.6vw, 28px);
   color: var(--text);
   text-align: center;
   margin-bottom: 16px;
-  max-width: 640px;
+  max-width: 680px;
   line-height: 1.6;
+}
+.completion h2 em {
+  color: var(--mint);
+  font-style: italic;
+  font-weight: 400;
 }
 .completion .sub {
   font-family: 'Space Mono', monospace;
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.15em;
   color: var(--text-dim);
-  margin-bottom: 48px;
+  margin-bottom: 36px;
+  max-width: 520px;
+  text-align: center;
+  line-height: 1.7;
+}
+.strength-section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--text-faint);
+  margin-bottom: 12px;
+  text-transform: uppercase;
 }
 .strength-rating {
   display: flex;
-  gap: 12px;
-  margin-bottom: 32px;
+  gap: 10px;
+  margin-bottom: 24px;
 }
 .strength-rating button {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   background: none;
   border: 1px solid var(--border);
   color: var(--text-dim);
   font-family: 'Space Mono', monospace;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.3s;
   border-radius: 2px;
@@ -339,7 +457,6 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   color: var(--mint);
 }
 
-/* ============ ENGINE MAIN BODY ============ */
 .engine-body {
   position: relative;
   z-index: 1;
@@ -654,12 +771,14 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
 
 @media (max-width: 640px) {
   .training { padding: 16px; }
-  .training-core { gap: 40px; }
+  .training-core { gap: 36px; }
   .breathing-circle { width: 220px; height: 220px; }
   .engine-body { padding: 48px 16px 64px; }
   .layer .name { flex: 0 0 100px; font-size: 11px; }
   .layer .desc { font-size: 12px; }
   .completion { padding: 20px; }
+  .training-bottom { font-size: 9px; }
+  .notice-btn, .skip-link { font-size: 9px; padding: 6px 10px; }
 }
 </style>
 </head>
@@ -667,7 +786,6 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
 
 <canvas id="starfield"></canvas>
 
-<!-- ============ TRAINING SCREEN — FIRST VIEW IS PRACTICE ============ -->
 <div class="training" id="training">
 
   <div class="training-top">
@@ -697,17 +815,21 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
         <circle class="ring-glow" cx="0" cy="0" r="60" fill="none" stroke="#a8e6cf" stroke-width="0.5" opacity="0.15"/>
         <circle class="ring-outer" cx="0" cy="0" r="50" fill="none" stroke="#a8e6cf" stroke-width="1" opacity="0.9"/>
         <circle class="ring-mid" cx="0" cy="0" r="40" fill="none" stroke="#a8e6cf" stroke-width="0.5" opacity="0.7"/>
-        <circle class="core-dot" cx="0" cy="0" r="4"/>
+        <circle class="core-dot" id="core-dot" cx="0" cy="0" r="4"/>
       </svg>
+      <div class="breath-label" id="breath-label">
+        <span class="zh">吸</span>
+        <span class="en">in</span>
+      </div>
     </div>
 
     <div class="cycle-counter" id="cycle-counter">
       <span></span><span></span><span></span><span></span><span></span><span></span>
     </div>
 
-    <div class="breath-label" id="breath-label">
-      <span class="zh">吸</span>
-      <span class="en">in</span>
+    <div class="field-flash" id="field-flash">
+      <span class="label" id="flash-label"></span>
+      <span class="main" id="flash-main"></span>
     </div>
   </div>
 
@@ -715,6 +837,10 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
     <button class="skip-link" onclick="completeTraining(true)">
       <span class="zh">我已经在场 →</span>
       <span class="en">I'm already here →</span>
+    </button>
+    <button class="notice-btn" id="notice-btn" onclick="captureNoticing()">
+      <span class="zh">我注意到了</span>
+      <span class="en">I noticed something</span>
     </button>
     <div>
       <span class="zh">8秒 · 一周期 · 共 6 周期</span>
@@ -724,22 +850,15 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
 
 </div>
 
-<!-- ============ COMPLETION OVERLAY ============ -->
 <div class="completion" id="completion">
-  <div class="completion-mark">
+  <div class="completion-mark" id="completion-mark">
     <span class="zh">钉位 · COMPLETE</span>
     <span class="en">ANCHORED · COMPLETE</span>
   </div>
-  <h2>
-    <span class="zh">你刚刚完成了一次<span style="color: var(--mint);">主动警觉位激活</span>。</span>
-    <span class="en">You just completed an act of <span style="color: var(--mint);">active awareness activation</span>.</span>
-  </h2>
-  <p class="sub">
-    <span class="zh">这是元意识在场的具体形式 · 不是知识 · 是体感</span>
-    <span class="en">This is meta-awareness in concrete form · not knowledge · felt sense</span>
-  </p>
+  <h2 id="completion-title"></h2>
+  <p class="sub" id="completion-sub"></p>
 
-  <div style="font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: var(--text-faint); margin-bottom: 12px;">
+  <div class="strength-section-label">
     <span class="zh">本次体感强度</span>
     <span class="en">FELT SENSE INTENSITY</span>
   </div>
@@ -752,7 +871,7 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   </div>
 
   <textarea class="note-input" id="note-input" maxlength="50" rows="2"
-    placeholder="可选 · 50字以内的体感锚点（不会被读取作为内容反刍材料）"></textarea>
+    placeholder="可选 · 50字以内的体感锚点（不作为内容反刍材料）"></textarea>
 
   <div class="completion-actions">
     <button class="primary" onclick="finishCompletion()">
@@ -771,13 +890,12 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
   <span class="en">↓ scroll into the engine</span>
 </div>
 
-<!-- ============ ENGINE MAIN BODY ============ -->
 <div class="engine-body" id="engine-body">
 
   <section class="body-intro">
     <div class="tag">
-      <span class="zh">xingyeLing7Ai · NODE 33 · AME v0.1</span>
-      <span class="en">xingyeLing7Ai · NODE 33 · AME v0.1</span>
+      <span class="zh">xingyeLing7Ai · NODE 33 · AME v0.1.2</span>
+      <span class="en">xingyeLing7Ai · NODE 33 · AME v0.1.2</span>
     </div>
     <h1>
       <span class="zh">主动心智<span class="accent">引擎</span></span>
@@ -808,11 +926,11 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
     <div class="stat zh"><span class="num" id="stat-total">0</span>总训练次数</div>
     <div class="stat zh"><span class="num" id="stat-streak">0</span>连续天数</div>
     <div class="stat zh"><span class="num" id="stat-last">—</span>上次访问</div>
-    <div class="stat zh"><span class="num" id="stat-strength">—</span>体感均值</div>
+    <div class="stat zh"><span class="num" id="stat-folds">0</span>元意识折回次数</div>
     <div class="stat en"><span class="num" id="stat-total-en">0</span>total sessions</div>
     <div class="stat en"><span class="num" id="stat-streak-en">0</span>day streak</div>
     <div class="stat en"><span class="num" id="stat-last-en">—</span>last entry</div>
-    <div class="stat en"><span class="num" id="stat-strength-en">—</span>avg felt sense</div>
+    <div class="stat en"><span class="num" id="stat-folds-en">0</span>meta-folds captured</div>
   </div>
 
   <div class="section-label">
@@ -825,7 +943,7 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
       <div class="node-id">
         <span>AME-01</span>
         <span class="status">
-          <span class="zh">已开放</span><span class="en">LIVE</span>
+          <span class="zh">已开放 v0.1.2</span><span class="en">LIVE v0.1.2</span>
         </span>
       </div>
       <div class="node-title">
@@ -837,8 +955,8 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
         <span class="en">Meta-awareness · 元意识层</span>
       </div>
       <p class="node-desc">
-        <span class="zh">把警觉位从偶发态训练为可主动激活态。让你能在没有外部刺激时自己点亮警觉。</span>
-        <span class="en">Train the awareness position from incidental into actively activatable. Light it up without external trigger.</span>
+        <span class="zh">隐藏在视线中的呼吸字让"注意到"自然发生——你成为自己警觉位在场的证人。</span>
+        <span class="en">Hidden-in-plain-sight breath labels let "noticing" emerge naturally — you become a witness to your own awareness position.</span>
       </p>
       <div class="node-footer">
         <div class="node-progress" id="prog-1">
@@ -958,8 +1076,8 @@ body[data-view="en"] { font-family: 'Spectral', 'DM Sans', serif; }
 
   <div class="footer">
     <div>
-      <span class="zh">AME v0.1 · xingyeLing7Ai · 振动认识论 NODE 33 · 427Hz</span>
-      <span class="en">AME v0.1 · xingyeLing7Ai · Vibration Epistemology NODE 33 · 427Hz</span>
+      <span class="zh">AME v0.1.2 · xingyeLing7Ai · 振动认识论 NODE 33 · 427Hz</span>
+      <span class="en">AME v0.1.2 · xingyeLing7Ai · Vibration Epistemology NODE 33 · 427Hz</span>
     </div>
     <div>
       <a href="https://mellowwei.github.io/" target="_blank">← MellowWei</a>
@@ -1007,14 +1125,15 @@ const loadProgress = () => {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { sessions: [] }; }
   catch { return { sessions: [] }; }
 };
-const saveSession = (node, strength, note) => {
+const saveSession = (node, strength, note, captureLevel) => {
   const data = loadProgress();
   data.sessions = data.sessions || [];
   data.sessions.push({
     t: Date.now(),
     node: node,
     strength: strength || null,
-    note: note || null
+    note: note || null,
+    capture: captureLevel || 0
   });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };
@@ -1025,23 +1144,37 @@ let trainingState = {
   cycleIndex: 0,
   active: true,
   startTime: null,
-  selectedStrength: null
+  selectedStrength: null,
+  noticeCount: 0
 };
 
 const breathLabel = document.getElementById('breath-label');
 const cycleCounter = document.getElementById('cycle-counter');
 const breathCircle = document.getElementById('breath-circle');
+const coreDot = document.getElementById('core-dot');
+const noticeBtn = document.getElementById('notice-btn');
+const fieldFlash = document.getElementById('field-flash');
+
+let lastCyclePhase = -1;
 
 const updateBreathLabel = (t) => {
-  const phase = (t % CYCLE_DURATION) / CYCLE_DURATION;
-  if (phase < 0.5) {
-    breathLabel.querySelector('.zh').textContent = '吸';
-    breathLabel.querySelector('.en').textContent = 'in';
-  } else {
-    breathLabel.querySelector('.zh').textContent = '呼';
-    breathLabel.querySelector('.en').textContent = 'out';
+  const cycleElapsed = t % CYCLE_DURATION;
+  const phase = cycleElapsed < CYCLE_DURATION / 2 ? 0 : 1;
+
+  if (phase !== lastCyclePhase) {
+    lastCyclePhase = phase;
+    breathLabel.classList.remove('cycle-in', 'cycle-out');
+    void breathLabel.offsetWidth;
+    if (phase === 0) {
+      breathLabel.querySelector('.zh').textContent = '吸';
+      breathLabel.querySelector('.en').textContent = 'in';
+      breathLabel.classList.add('cycle-in');
+    } else {
+      breathLabel.querySelector('.zh').textContent = '呼';
+      breathLabel.querySelector('.en').textContent = 'out';
+      breathLabel.classList.add('cycle-out');
+    }
   }
-  breathLabel.classList.add('show');
 };
 
 let trainingLoop = null;
@@ -1049,8 +1182,14 @@ const startTraining = () => {
   trainingState.cycleIndex = 0;
   trainingState.startTime = performance.now();
   trainingState.active = true;
+  trainingState.noticeCount = 0;
+  lastCyclePhase = -1;
   cycleCounter.querySelectorAll('span').forEach(s => s.classList.remove('done'));
   breathCircle.classList.add('active');
+  noticeBtn.classList.remove('captured', 'completed');
+  noticeBtn.querySelector('.zh').textContent = '我注意到了';
+  noticeBtn.querySelector('.en').textContent = 'I noticed something';
+  fieldFlash.classList.remove('show');
 
   const tick = () => {
     if (!trainingState.active) return;
@@ -1077,10 +1216,105 @@ const startTraining = () => {
   trainingLoop = requestAnimationFrame(tick);
 };
 
+const captureNoticing = () => {
+  if (!trainingState.active) return;
+  if (trainingState.noticeCount >= 2) return;
+
+  trainingState.noticeCount += 1;
+
+  if (trainingState.noticeCount === 1) {
+    fieldFlash.querySelector('#flash-label').innerHTML =
+      '<span class="zh">第一层捕获 · LAYER 1 CAPTURED</span>' +
+      '<span class="en">LAYER 1 CAPTURED · 第一层捕获</span>';
+    fieldFlash.querySelector('#flash-main').innerHTML =
+      '<span class="zh">一阶注意 · 你<em>看见了</em>呼吸字</span>' +
+      '<span class="en">First-order noticing · you <em>saw</em> the breath labels</span>';
+    fieldFlash.classList.add('show');
+    setTimeout(() => fieldFlash.classList.remove('show'), 3000);
+
+    noticeBtn.classList.add('captured');
+    noticeBtn.querySelector('.zh').textContent = '我注意到自己注意到了';
+    noticeBtn.querySelector('.en').textContent = 'I noticed myself noticing';
+  } else if (trainingState.noticeCount === 2) {
+    coreDot.classList.remove('flash');
+    void coreDot.offsetWidth;
+    coreDot.classList.add('flash');
+
+    fieldFlash.querySelector('#flash-label').innerHTML =
+      '<span class="zh">第二层捕获 · LAYER 2 CAPTURED</span>' +
+      '<span class="en">LAYER 2 CAPTURED · 第二层捕获</span>';
+    fieldFlash.querySelector('#flash-main').innerHTML =
+      '<span class="zh"><em>元意识折回</em> · 警觉位实地证据已捕获</span>' +
+      '<span class="en"><em>Meta-awareness fold</em> · field evidence captured</span>';
+    fieldFlash.classList.add('show');
+    setTimeout(() => fieldFlash.classList.remove('show'), 3800);
+
+    noticeBtn.classList.remove('captured');
+    noticeBtn.classList.add('completed');
+    noticeBtn.querySelector('.zh').textContent = '已捕获 · 第二层';
+    noticeBtn.querySelector('.en').textContent = 'captured · layer 2';
+  }
+};
+
+const completionContent = {
+  0: {
+    markClass: 'honest',
+    mark: { zh: '诚实位 · HONEST', en: 'HONEST · 诚实位' },
+    title: {
+      zh: '训练完成 · 警觉位是否激活由你自己判断。',
+      en: 'Training complete · whether awareness activated is yours to judge.'
+    },
+    sub: {
+      zh: '没有捕获不等于失败。诚实地不命名一个未发生的事件 · 本身就是元主动在工作。',
+      en: 'Non-capture is not failure. Honestly refusing to name an event that did not occur · is itself meta-activity at work.'
+    }
+  },
+  1: {
+    markClass: 'partial',
+    mark: { zh: '部分捕获 · PARTIAL', en: 'PARTIAL · 部分捕获' },
+    title: {
+      zh: '一阶注意捕获 · 你看见了。元意识折回本次未触发。',
+      en: 'First-order noticing captured · you saw it. Meta-awareness fold did not trigger this time.'
+    },
+    sub: {
+      zh: '这不是失败位。一阶在场 + 元层未发生 · 是常态。多次训练后元层折回会自然出现。',
+      en: 'Not a failure. First-order presence + meta-layer absent · is the norm. Meta-fold emerges naturally over repeated practice.'
+    }
+  },
+  2: {
+    markClass: '',
+    mark: { zh: '完整捕获 · COMPLETE', en: 'COMPLETE · 完整捕获' },
+    title: {
+      zh: '元意识折回 · 实地证据完整捕获。你刚刚成为自己警觉位在场的<em>证人</em>。',
+      en: 'Meta-awareness fold · field evidence fully captured. You just became a <em>witness</em> to your own awareness position.'
+    },
+    sub: {
+      zh: '这是元意识在场的具体形式 · 不是知识 · 是体感 · 是你自己证明了你自己。',
+      en: 'This is meta-awareness in concrete form · not knowledge · felt sense · you proved yourself to yourself.'
+    }
+  }
+};
+
 const completeTraining = (skipped) => {
   trainingState.active = false;
   if (trainingLoop) cancelAnimationFrame(trainingLoop);
   breathCircle.classList.remove('active');
+  fieldFlash.classList.remove('show');
+
+  const level = trainingState.noticeCount;
+  const content = completionContent[level];
+  const markEl = document.getElementById('completion-mark');
+  markEl.className = 'completion-mark ' + content.markClass;
+  markEl.innerHTML =
+    '<span class="zh">' + content.mark.zh + '</span>' +
+    '<span class="en">' + content.mark.en + '</span>';
+  document.getElementById('completion-title').innerHTML =
+    '<span class="zh">' + content.title.zh + '</span>' +
+    '<span class="en">' + content.title.en + '</span>';
+  document.getElementById('completion-sub').innerHTML =
+    '<span class="zh">' + content.sub.zh + '</span>' +
+    '<span class="en">' + content.sub.en + '</span>';
+
   document.getElementById('training').classList.add('fade-out');
   setTimeout(() => {
     document.getElementById('completion').classList.add('show');
@@ -1110,7 +1344,7 @@ document.querySelectorAll('.strength-rating button').forEach(btn => {
 
 const finishCompletion = () => {
   const note = document.getElementById('note-input').value.trim().slice(0, 50);
-  saveSession(1, trainingState.selectedStrength, note || null);
+  saveSession(1, trainingState.selectedStrength, note || null, trainingState.noticeCount);
   renderDashboard();
   document.getElementById('completion').classList.remove('show');
   document.body.classList.remove('locked');
@@ -1137,13 +1371,12 @@ const renderDashboard = () => {
   }
   const last = sessions.length ? new Date(sessions[sessions.length-1].t) : null;
   const lastStr = last ? `${last.getMonth()+1}/${last.getDate()}` : '—';
-  const strengths = sessions.filter(s => s.strength).map(s => s.strength);
-  const avg = strengths.length ? (strengths.reduce((a,b)=>a+b,0)/strengths.length).toFixed(1) : '—';
+  const folds = sessions.filter(s => s.capture >= 2).length;
 
   ['total','total-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = total; });
   ['streak','streak-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = streak; });
   ['last','last-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = lastStr; });
-  ['strength','strength-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = avg; });
+  ['folds','folds-en'].forEach(id => { const el=document.getElementById('stat-'+id); if(el) el.textContent = folds; });
 
   for (let n = 1; n <= 4; n++) {
     const count = sessions.filter(s => s.node === n).length;
